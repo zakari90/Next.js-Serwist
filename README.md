@@ -1,40 +1,28 @@
-# Serwist example - next-basic
+This is a Next.js project bootstrapped with create-next-app.
 
-This example demonstrates how to use Serwist with Next.js.
+Getting Started
+Install dependencies:
 
-## Usage
+``` 
+npm install
 
-[![Open in Gitpod and run](https://img.shields.io/badge/Open%20In-Gitpod.io-%231966D2?style=for-the-badge&logo=gitpod)](https://gitpod.io/#https://github.com/serwist/serwist/)
+Build the project:
+npm run build
 
-```bash
-cd examples/next-basic
-pnpm build
-pnpm start
+Start the server:
+npm run start
 ```
+Open http://localhost:3000 in your browser.
 
-or
+How to Test Offline Behavior
+On the Home page, enter any number and navigate to the Doc page.
 
-Execute [`degit`](https://github.com/Rich-Harris/degit) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), [pnpm](https://pnpm.io), or [bun](https://bun.sh) to bootstrap the example:
+Open DevTools → Application → Service Workers and check the Offline box to simulate offline mode.
 
-```bash
-npx degit serwist/serwist/examples/next-basic my-app
-```
+Go back to Home, enter a new number, and you’ll be redirected to the offline Doc page.
 
-```bash
-yarn degit serwist/serwist/examples/next-basic my-app
-```
+Change the number in the URL — it will still load the offline Doc page.
 
-```bash
-pnpx degit serwist/serwist/examples/next-basic my-app
-```
-
-```bash
-bunx degit serwist/serwist/examples/next-basic my-app
-```
-
-## Recommended `.gitignore`
-
-```gitignore
-public/sw*
-public/swe-worker*
-```
+Special Case: Unknown Routes
+If you navigate to an unknown route (e.g., /unknown),
+it will display a public offline page — not the offline Doc page.
