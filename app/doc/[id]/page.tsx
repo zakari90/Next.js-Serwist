@@ -21,7 +21,9 @@ export default function Doc() {
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
       >
        عودة للصفحة الرئيسية ( back to home)
-      </button>
+      </button><p>
+        ssssssssssssssssssssssssssssssssssssssss
+      </p>
       <TodoApp />
     </div>
   );

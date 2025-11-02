@@ -32,11 +32,12 @@ function TodoApp() {
       <form onSubmit={addTodo}>
         <input
           type="text"
+          className="border-amber-300"
           value={name}
           placeholder="To-do name"
           onChange={(e) => setName(e.target.value)}
         />
-        <button type="submit">Add</button>
+        <button className="bg-amber-400" type="submit">Add</button>
       </form>
       <ul>
         {todos.map((todo) => (
