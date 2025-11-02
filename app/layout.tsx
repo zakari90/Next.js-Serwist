@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import ServiceWorkerRegister from "../pages/client-sw-register";
 
 const APP_NAME = "NJS App";
 const APP_DESCRIPTION = "Next.js + Serwist PWA";
@@ -46,7 +47,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             }
             `}</style>
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorkerRegister/>
+        
+        </body>
     </html>
   );
 }
