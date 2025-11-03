@@ -13,14 +13,31 @@ function TodoApp() {
   }, []);
 
   // Add new todo with status "w" (waiting sync)
-  const addTodo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    const todo: Todo = { name, status: "w" };
-    await DexieActions.InsertBulk([todo]);
-    setName("");
-    setTodos(await DexieActions.ReadData());
-  };
+const addTodo = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!name.trim()) return;
+
+  // First try saving to server
+  let serverTodo: Todo | null = null;
+  try {
+    // try Server
+    serverTodo = await ServerAction.SaveToServer({ name });
+  } catch (err) {
+    console.log("saving to server failed:", err);
+    
+    // ignore, will fallback to local
+  }
+
+  // What to insert in Dexie?
+  const todo: Todo = serverTodo
+    ? { ...serverTodo, status: "1" } // mark as synced if server worked
+    : { name, status: "w" }; // fallback: status waiting
+
+  await DexieActions.InsertBulk([todo]);
+  setName("");
+  setTodos(await DexieActions.ReadData());
+};
+
 
   // Delete: if not synced, just delete; else mark as "0" for later remote removal
   const deleteTodo = async (id?: number) => {

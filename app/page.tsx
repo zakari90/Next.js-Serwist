@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import TodoApp from "../pages/todolis";
+import SubscriptionButton from "../pages/pushSeviceSubscription";
 
 export default function Home() {
   const router = useRouter();
@@ -28,6 +30,8 @@ export default function Home() {
       >
        اذهب لصفحة العرض ( Go To Document )
       </button>
+      <TodoApp />
+      <SubscriptionButton/>
     </div>
   );
 }

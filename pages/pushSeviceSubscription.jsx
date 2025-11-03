@@ -1,7 +1,7 @@
 
 const subscribe_url = process.env.NEXT_PUBLIC_BASE_URL + '/subscribe';
 
-const SubscriptionButton = () => {
+export default SubscriptionButton = () => {
   
   const publicKey= process.env.NEXT_PUBLIC_PUBLIC_KEY;
   async function Subscribe(){
@@ -62,4 +62,3 @@ const SubscriptionButton = () => {
   );
 };
 
-export default SubscriptionButton;

@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import TodoApp from '../../../pages/todolis';
+import { useEffect, useState } from 'react';
 
 export default function Doc() {
   const [id, setId] = useState('...');
@@ -22,9 +21,7 @@ export default function Doc() {
       >
        عودة للصفحة الرئيسية ( back to home)
       </button><p>
-        ssssssssssssssssssssssssssssssssssssssss
       </p>
-      <TodoApp />
     </div>
   );
 }
