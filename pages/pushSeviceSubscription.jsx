@@ -1,10 +1,9 @@
 
-const subscribe_url = import.meta.env.VITE_APP_SUBSCRIBE_URL;
+const subscribe_url = process.env.NEXT_PUBLIC_BASE_URL + '/subscribe';
 
 const SubscriptionButton = () => {
   
-  const publicKey= "BCVJ5e1QrTpJ35UGANpj5q7mQ4VFXofJMK4-FxK1WWpiTGmVZUea6U7bzkTohj04t9BQEykL6MUBe9uHBZXlZm4"
- 
+  const publicKey= process.env.NEXT_PUBLIC_PUBLIC_KEY;
   async function Subscribe(){
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
