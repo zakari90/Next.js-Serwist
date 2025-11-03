@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const subscribe_url = process.env.NEXT_PUBLIC_BASE_URL + '/subscribe';
 
-export default SubscriptionButton = () => {
+export default function SubscriptionButton() {
   
   const publicKey= process.env.NEXT_PUBLIC_PUBLIC_KEY;
   async function Subscribe(){
@@ -46,7 +47,7 @@ export default SubscriptionButton = () => {
     }
   };
   
-  function urlBase64ToUint8Array(base64String) {
+  function urlBase64ToUint8Array(base64String:any) {
       const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
       const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
       const rawData = window.atob(base64);
