@@ -1,92 +1,59 @@
 import DexieActions, { Todo } from "./dexiedb";
+const api_url = process.env.NEXT_PUBLIC_BASE_URL + "/api/todos";
 
-// The API endpoint (update as needed)
-const api_url = "https://thriving-alpaca-4a24ea.netlify.app/doc";
-
-interface ServerActionType {
-  SaveToServer: (todo: Todo) => Promise<Todo | null>;
-  DeleteFromServer: (id: number) => Promise<Response>;
-  Sync: () => Promise<string>;
-  ReadFromServer: () => Promise<Todo[]>;
-  ImportFromServer: () => Promise<void>;
-}
-
-const ServerAction: ServerActionType = {
-  // Save to-do to server
-  async SaveToServer(todo: Todo): Promise<Todo | null> {
+const ServerAction = {
+  async SaveToServer(todo: Todo) {
     try {
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(todo)
       });
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
-      }
-      return await response.json() as Todo;
-    } catch (error) {
-      console.error("Failed to save:", error);
+      if (!response.ok) throw new Error("HTTP Error: " + response.status);
+      return response.json();
+    } catch (e) {
       return null;
     }
   },
-
-  // Delete to-do from server
-  async DeleteFromServer(id: number): Promise<Response> {
-    return await fetch(`${api_url}/${id}`, {
-      method: "DELETE"
-    });
+  async DeleteFromServer(id: number) {
+    return fetch(`${api_url}/${id}`, { method: "DELETE" });
   },
+  async Sync() {
+    // Get all todos with status "w" (waiting to sync) or "0" (pending deletion)
+    const waitingData = await DexieActions.ReadDataByStatus(["0", "w"]);
+    if (waitingData.length === 0) return "No items to sync.";
 
-  // Sync all local to-dos to server
-  async Sync(): Promise<string> {
-    try {
-      const waitingData = await DexieActions.ReadDataByStatus(["w", "0"]);
-      if (waitingData.length === 0) {
-        return "No items to sync..";
+    for (const itm of waitingData) {
+      if (itm.status === "w") itm.status = "1"; // Mark as synced if upload successful
+      let result;
+      if (itm.status === "0") {
+        result = await ServerAction.DeleteFromServer(itm.id!);
+      } else {
+        result = await ServerAction.SaveToServer(itm);
       }
-      for (const item of waitingData) {
-        const result = item.status === "0" ?
-        await ServerAction.DeleteFromServer(item.id!):
-        await ServerAction.SaveToServer(item)
 
-        if (item.status === "w") {
-                item.status = "1";
-            }
-        if (!result) {
-          throw new Error("Error during saving some items to server.");
+      if (result) {
+        if (itm.status === "0") {
+          await DexieActions.DeleteById(itm.id!);
+        } else {
+          await DexieActions.Update(itm.id!, itm);
         }
-        // Optionally mark as synced in Dexie or delete after sync if needed
+      } else {
+        throw new Error("Error syncing item");
       }
-      return "Sync completed successfully.";
-    } catch (error) {
-      console.log("Error..", error);
-      throw error;
     }
-  },
 
-  // Read all to-dos from server
-  async ReadFromServer(): Promise<Todo[]> {
-    try {
-      const res = await fetch(api_url);
-      if (!res.ok) throw new Error(`Fetch failed with status: ${res.status}`);
-      const data: Todo[] = await res.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      throw error;
-    }
+    return "Sync completed successfully.";
   },
-
-  // Replace local to-dos with server to-dos (import)
-  async ImportFromServer(): Promise<void> {
-    try {
-      const serverTodos = await ServerAction.ReadFromServer();
-      // Optionally clear local DB first (implement DexieActions.ClearAll if needed)
-      await DexieActions.InsertBulk(serverTodos);
-    } catch (error) {
-      console.error("Import failed:", error);
-      throw error;
-    }
+  async ReadFromServer() {
+    const res = await fetch(api_url);
+    if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
+    return res.json();
+  },
+  async ImportFromServer() {
+    const data = await ServerAction.ReadFromServer();
+    await DexieActions.DeleteByStatus("1"); // clear all synced todos to avoid duplicates
+    await DexieActions.InsertBulk(data);
   }
 };
 
