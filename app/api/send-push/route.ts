@@ -2,14 +2,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
-
-// Must use same public/private as above!
-
+import { subscriptions } from "../../../lib/subscriptionStore";
 const publicKey = process.env.NEXT_PUBLIC_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY || "YOUR_PRIVATE_KEY";
 webpush.setVapidDetails("mailto:you@example.com", publicKey, privateKey);
 
-import { subscriptions } from "../subscribe/route";
 
 // Send a push payload to all subscribers
 export async function POST(req: NextRequest) {

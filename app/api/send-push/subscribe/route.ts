@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// app/api/subscribe/route.ts
+ // app/api/subscribe/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
+import { subscriptions } from "../../../../lib/subscriptionStore";
 
 const publicKey = process.env.NEXT_PUBLIC_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY || "YOUR_PRIVATE_KEY";
@@ -15,7 +15,6 @@ webpush.setVapidDetails(
 );
 
 // In-memory subscriptions array (use database for prod!)
-export const subscriptions: any[] = [];
 
 // Handle receiving a new subscription from client
 export async function POST(req: NextRequest) {
