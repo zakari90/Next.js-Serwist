@@ -1,85 +1,46 @@
+// dexiedb.ts (TypeScript example)
 import Dexie, { Table } from "dexie";
 
-export type Todo = {
+export interface Todo {
   id?: number;
   name: string;
-};
-
-export interface DexieTodosDB extends Dexie {
-  todos: Table<Todo, number>;
+  status?: string; // "1" (synced), "w" (waiting to sync), "0" (pending delete)
 }
 
-const INDEXEDDB_NAME = "TodoDB";
+class TodoDB extends Dexie {
+  todos!: Table<Todo, number>;
 
-const TABLES = {
-  todos: {
-    tableName: "todos",
-    columns: { id: "id", name: "name" }
+  constructor() {
+    super("TodoDB");
+    this.version(1).stores({
+      todos: "++id,name,status"
+    });
   }
-};
+}
 
-type TodoInsert = Omit<Todo, 'id'> | Todo; // Allows optional id for insertBulk
+export const dexieDb = new TodoDB();
 
 const DexieActions = {
-  OpenDb: function (): DexieTodosDB {
-    const db = new Dexie(INDEXEDDB_NAME) as DexieTodosDB;
-    db.version(1).stores({ todos: "++id,name" });
-    return db;
+  async InsertBulk(data: Todo[]) {
+    await dexieDb.todos.bulkPut(data);
   },
-
-  InsertBulk: async function (data: TodoInsert[]): Promise<void> {
-    let db: DexieTodosDB | undefined;
-    try {
-      db = DexieActions.OpenDb();
-      await db.todos.bulkPut(data);
-    } catch (ex) {
-      console.log("error insert bulk", ex);
-    } finally {
-      db?.close();
-    }
+  async ReadData() {
+    return dexieDb.todos.orderBy("id").and((item) => item.status !== "0").toArray();
   },
-
-  DatabaseExists: async function (): Promise<boolean> {
-    return Dexie.exists(INDEXEDDB_NAME);
+  async ReadDataByID(id: number) {
+    return dexieDb.todos.where("id").equals(id).toArray();
   },
-
-  ReadData: async function (): Promise<Todo[]> {
-    const db = DexieActions.OpenDb();
-    const result = await db.todos.orderBy(TABLES.todos.columns.id).toArray();
-    db.close();
-    return result;
+  async ReadDataByStatus(statuses: string[]) {
+    return dexieDb.todos.where("status").anyOf(statuses).toArray();
   },
-
-  ReadDataByID: async function (id: number): Promise<Todo[]> {
-    const db = DexieActions.OpenDb();
-    const result = await db.todos.where(TABLES.todos.columns.id).equals(id).toArray();
-    db.close();
-    return result;
+  async DeleteById(id: number) {
+    await dexieDb.todos.delete(id);
   },
-
-  DeleteById: async function (id: number): Promise<void> {
-    let db: DexieTodosDB | undefined;
-    try {
-      db = DexieActions.OpenDb();
-      await db.todos.delete(id);
-      console.log("Deleted.");
-    } catch (ex) {
-      console.log("Error delete.. ", ex);
-    } finally {
-      db?.close();
-    }
+  async DeleteByStatus(status: string) {
+    await dexieDb.todos.where("status").equals(status).delete();
   },
-
-  Update: async function (id: number, newData: Partial<Todo>): Promise<void> {
-    let db: DexieTodosDB | undefined;
-    try {
-      db = DexieActions.OpenDb();
-      await db.todos.update(id, newData);
-    } catch (ex) {
-      console.log("Error update.. ", ex);
-    } finally {
-      db?.close();
-    }
+  async Update(id: number, data: Partial<Todo>) {
+    await dexieDb.todos.update(id, data);
   }
 };
 
