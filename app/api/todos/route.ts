@@ -1,3 +1,4 @@
+// app/api/todos/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 type Todo = {
@@ -16,14 +17,15 @@ export async function GET(req: NextRequest) {
 
 // Accepts { name: string }
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  if (!body.name) {
-    return NextResponse.json({ error: "Missing name" }, { status: 400 });
-  }
-  const todo: Todo = { id: getNextId(), name: body.name };
-  todos.push(todo);
-  return NextResponse.json(todo, { status: 201 });
+  const body = await req.json();
+  if (!body.name) {
+    return NextResponse.json({ error: "Missing name" }, { status: 400 });
+  }
+  const todo: Todo = { id: getNextId(), name: body.name };
+  todos.push(todo);
+  return NextResponse.json(todo, { status: 201 });
 }
+
 
 // Accepts { id: number } in body to delete
 export async function DELETE(req: NextRequest) {
